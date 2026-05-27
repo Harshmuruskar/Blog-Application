@@ -9,7 +9,8 @@ import java.util.List;
 
 public interface PostRepo extends JpaRepository<Post , Integer> {
     List<Post> getAllByUser(User user);
-    List<Category> getAllByCategory(Category category);
+    List<Post> getAllByCategory(Category category);
+    List<Post> findByTitleContaining(String title);
 
 
 }
