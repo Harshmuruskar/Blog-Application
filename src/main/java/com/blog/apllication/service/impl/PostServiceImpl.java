@@ -11,6 +11,10 @@ import com.blog.apllication.repository.UserRepo;
 import com.blog.apllication.service.PostService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -68,9 +72,20 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDto> getAllPost() {
-        List<Post> posts = this.postRepo.findAll();
-        return posts.stream().map(post -> this.modelMapper.map(post, PostDto.class)).collect(Collectors.toList());
+    public Page<PostDto> getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+        int safePageNumber = pageNumber == null || pageNumber < 0 ? 0 : pageNumber;
+        int safePageSize = pageSize == null || pageSize <= 0 ? 5 : pageSize;
+        String safeSortBy = sortBy == null || sortBy.isBlank() ? "addedDate" : sortBy;
+        String safeSortDir = sortDir == null || sortDir.isBlank() ? Sort.Direction.DESC.name() : sortDir;
+
+        Sort sort = safeSortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(safeSortBy).ascending()
+                : Sort.by(safeSortBy).descending();
+
+        Pageable pageable = PageRequest.of(safePageNumber, safePageSize, sort);
+        Page<Post> postPage = this.postRepo.findAll(pageable);
+
+        return postPage.map(post -> this.modelMapper.map(post, PostDto.class));
     }
 
     @Override
