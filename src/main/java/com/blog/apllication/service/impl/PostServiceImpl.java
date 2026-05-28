@@ -5,6 +5,7 @@ import com.blog.apllication.entity.Post;
 import com.blog.apllication.entity.User;
 import com.blog.apllication.exceptions.ResourceNotFoundException;
 import com.blog.apllication.payload.PostDto;
+import com.blog.apllication.payload.PostResponse;
 import com.blog.apllication.repository.CategoryRepo;
 import com.blog.apllication.repository.PostRepo;
 import com.blog.apllication.repository.UserRepo;
@@ -72,7 +73,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostDto> getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+    public PostResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
         int safePageNumber = pageNumber == null || pageNumber < 0 ? 0 : pageNumber;
         int safePageSize = pageSize == null || pageSize <= 0 ? 5 : pageSize;
         String safeSortBy = sortBy == null || sortBy.isBlank() ? "addedDate" : sortBy;
@@ -84,8 +85,20 @@ public class PostServiceImpl implements PostService {
 
         Pageable pageable = PageRequest.of(safePageNumber, safePageSize, sort);
         Page<Post> postPage = this.postRepo.findAll(pageable);
+        List<PostDto> postDtos = postPage.getContent().stream()
+                .map(post -> this.modelMapper.map(post, PostDto.class))
+                .collect(Collectors.toList());
 
-        return postPage.map(post -> this.modelMapper.map(post, PostDto.class));
+        PostResponse postResponse = new PostResponse(
+                postDtos,
+                postPage.getNumber(),
+                postPage.getSize(),
+                postPage.getTotalElements(),
+                postPage.getTotalPages(),
+                postPage.isLast()
+        );
+
+        return postResponse;
     }
 
     @Override

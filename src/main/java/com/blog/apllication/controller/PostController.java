@@ -2,9 +2,9 @@ package com.blog.apllication.controller;
 
 import com.blog.apllication.payload.ApiResponse;
 import com.blog.apllication.payload.PostDto;
+import com.blog.apllication.payload.PostResponse;
 import com.blog.apllication.service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,12 +45,12 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<Page<PostDto>> getAllPosts(
+    public ResponseEntity<PostResponse> getAllPosts(
             @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
             @RequestParam(value = "sortBy", defaultValue = "addedDate") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir){
-        Page<PostDto> posts = postService.getAllPost(pageNumber, pageSize, sortBy, sortDir);
+        PostResponse posts = postService.getAllPost(pageNumber, pageSize, sortBy, sortDir);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
